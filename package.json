@@ -1,4 +1,4 @@
-{{
+{
   "name": "pterodash",
   "version": "1.0.0",
   "description": "WhatsApp Dashboard dengan Baileys + Express",
