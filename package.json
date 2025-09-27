@@ -1,0 +1,14 @@
+{{
+  "name": "pterodash",
+  "version": "1.0.0",
+  "description": "WhatsApp Dashboard dengan Baileys + Express",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.6",
+    "express": "^4.18.2",
+    "qrcode": "^1.5.3"
+  }
+}

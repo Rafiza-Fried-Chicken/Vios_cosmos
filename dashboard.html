@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dashboard - Silent</title>
+<style>
+  :root{
+    --bg:#050005;
+    --card:#0d0b11;
+    --accent:#a33bff;
+    --muted:#7b6b8b;
+    --glass:rgba(255,255,255,0.03);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:Inter, system-ui, Arial, sans-serif;
+    background: radial-gradient(circle at 10% 10%, rgba(163,59,255,0.12), transparent 10%),
+                radial-gradient(circle at 90% 90%, rgba(163,59,255,0.06), transparent 10%),
+                var(--bg);
+    color:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:28px 12px;
+  }
+
+  .wrapper{
+    width:420px;
+    max-width:96%;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 10px 40px rgba(160,40,255,0.12);
+    border:1px solid rgba(163,59,255,0.12);
+    position:relative;
+  }
+
+  .close-top{
+    position:absolute;
+    right:14px;
+    top:12px;
+    background:#230021;
+    width:36px;
+    height:36px;
+    border-radius:10px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    border:1px solid rgba(255,50,50,0.12);
+    color:#ff6b6b;
+    font-weight:700;
+  }
+
+  .logo{
+    text-align:center;
+    margin-top:2px;
+  }
+  .logo img{ width:72px; height:20px; object-fit:contain; opacity:0.95; filter: drop-shadow(0 2px 8px rgba(163,59,255,0.25)); }
+
+  h1{ margin:14px 0 4px; font-size:28px; letter-spacing:0.4px; font-weight:700; color:#d9caff; text-align:center;}
+  .statusLine{ display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:12px;}
+  .dot{ width:12px; height:12px; border-radius:50%; background:#ff3b3b; box-shadow:0 0 8px rgba(255,59,59,0.18); }
+  .dot.connected{ background: #6cff6c; box-shadow:0 0 14px rgba(108,255,108,0.12);}
+  .statusText{ color:var(--muted); font-size:13px; letter-spacing:0.6px; text-transform:uppercase; }
+
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+    border-radius:12px;
+    padding:12px;
+    margin:12px 0;
+    border:1px solid rgba(163,59,255,0.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  }
+
+  .targetInput{
+    width:100%;
+    padding:14px 12px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.04);
+    background:var(--glass);
+    color:#dcd3ff;
+    font-size:14px;
+    outline:none;
+  }
+
+  .selectBox{
+    margin-top:14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .bigBtn{
+    width:100%;
+    padding:14px;
+    font-weight:700;
+    border-radius:12px;
+    border:2px solid rgba(163,59,255,0.12);
+    background:linear-gradient(180deg,var(--accent), #7f2dff);
+    color:#fff;
+    font-size:16px;
+    cursor:pointer;
+    box-shadow:0 6px 20px rgba(163,59,255,0.16);
+  }
+
+  .executeBtn{
+    margin-top:12px;
+    background:linear-gradient(180deg,#9b3aff,#7d25f0);
+    border:none;
+  }
+
+  .smallMenu{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin-top:14px;
+    flex-wrap:wrap;
+  }
+  .smallMenu a, .smallMenu button{
+    padding:9px 12px;
+    background:rgba(255,255,255,0.02);
+    border-radius:10px;
+    border:1px solid rgba(163,59,255,0.06);
+    color:#ddd;
+    text-decoration:none;
+    font-size:13px;
+    cursor:pointer;
+  }
+
+  .infoBadge{
+    display:inline-flex;
+    gap:8px;
+    align-items:center;
+    margin-top:12px;
+    background:rgba(255,255,255,0.02);
+    padding:8px 12px;
+    border-radius:12px;
+    border:1px solid rgba(163,59,255,0.06);
+    color:#d7c7ff;
+    font-size:13px;
+  }
+
+  /* modal */
+  .modalOverlay{ position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:1000;}
+  .modalCard{ width:360px; background:linear-gradient(180deg,#0b0710,#10061a); border-radius:12px; padding:14px; border:1px solid rgba(163,59,255,0.08); box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+  .modalHeader{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .modalClose{ background:#230021;color:#ff6b6b;padding:8px;border-radius:8px; cursor:pointer;}
+  .modalBtns{ display:flex; gap:8px; margin-top:8px; }
+  .qrBox, .codeBox{ margin-top:12px; padding:12px; border-radius:10px; border:1px dashed rgba(163,59,255,0.12); background:transparent; color:#eee; font-size:14px; text-align:center;}
+  .pairBtn{ margin-top:12px; padding:10px; width:100%; border-radius:10px; border:none; background:linear-gradient(180deg,#7d25f0,#5d1ae0); color:white; font-weight:700; cursor:pointer; }
+
+  /* small responsive */
+  @media (max-width:480px){
+    .wrapper{ width:360px; padding:16px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrapper" role="main">
+    <div class="close-top" id="topClose" title="Close dashboard">✖</div>
+
+    <div class="logo">
+      <!-- replace with logo if needed -->
+      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='28'><rect width='100%' height='100%' fill='transparent'/></svg>" alt="Xata Logo">
+    </div>
+
+    <h1>Welcome, member</h1>
+    <div class="statusLine">
+      <div class="dot" id="statusDot"></div>
+      <div class="statusText" id="statusText">BELUM TERHUBUNG</div>
+    </div>
+
+    <div class="card">
+      <input id="targetInput" class="targetInput" placeholder="Please input target number. example : 62xxxx" value="">
+      <div class="selectBox">
+        <select id="funcSelect" style="flex:1; padding:12px; border-radius:10px; background:#0b0710; color:#fff; border:2px solid rgba(163,59,255,0.12)">
+          <option value="android">⚡ Android Delay</option>
+          <option value="ip">🌐 IP Delay</option>
+          <option value="hard">🔥 Delay Hard</option>
+          <option value="spam">💥 Spam</option>
+          <option value="custom">🛠 Custom</option>
+        </select>
+      </div>
+
+      <button class="bigBtn executeBtn" id="execBtn">🚀 EXECUTE</button>
+
+      <div class="smallMenu">
+        <a href="manager.html" id="manageBtn">👥 Manage User</a>
+        <a href="developer.html" id="devBtn">💻 Developer</a>
+        <button id="connBtn">📡 Connection</button>
+        <a href="#" id="logoutBtn">🚪 Logout</a>
+      </div>
+
+      <div style="text-align:center; margin-top:10px;">
+        <div class="infoBadge"><span>👤 vios</span><span>⏳ 23/10/25, 23.50</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connection modal -->
+  <div class="modalOverlay" id="modal">
+    <div class="modalCard">
+      <div class="modalHeader">
+        <div style="font-weight:700">Koneksi Nomor</div>
+        <div class="modalClose" id="modalClose">✖</div>
+      </div>
+
+      <div>
+        <input id="senderInput" placeholder="Masukkan nomor untuk pairing (62 or 08)" style="width:100%; padding:10px; border-radius:10px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:#eee">
+      </div>
+
+      <div class="modalBtns">
+        <button id="btnQR" style="flex:1; padding:10px; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid rgba(163,59,255,0.06); cursor:pointer;">🔳 Koneksi pakai QR</button>
+        <button id="btnCode" style="flex:1; padding:10px; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid rgba(163,59,255,0.06); cursor:pointer;">🔢 Koneksi pakai Kode</button>
+      </div>
+
+      <div id="connectionResult"></div>
+      <button class="pairBtn" id="doPairBtn">Hubungkan</button>
+    </div>
+  </div>
+
+<script>
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  const connBtn = document.getElementById('connBtn');
+  const modal = document.getElementById('modal');
+  const modalClose = document.getElementById('modalClose');
+  const btnQR = document.getElementById('btnQR');
+  const btnCode = document.getElementById('btnCode');
+  const connectionResult = document.getElementById('connectionResult');
+  const doPairBtn = document.getElementById('doPairBtn');
+  const senderInput = document.getElementById('senderInput');
+  const execBtn = document.getElementById('execBtn');
+  const targetInput = document.getElementById('targetInput');
+  const funcSelect = document.getElementById('funcSelect');
+
+  let pairingMode = null; // 'qr' or 'code'
+  let lastGenerated = null; // {type, payload, dataUrl?}
+
+  // open modal
+  connBtn.addEventListener('click', async ()=>{
+    modal.style.display = 'flex';
+    connectionResult.innerHTML = '';
+    senderInput.value = '';
+    // show BAILEYS QR if available
+    await fetchQRCodeIfExists();
+  });
+  modalClose.addEventListener('click', ()=> modal.style.display = 'none');
+  document.getElementById('topClose').addEventListener('click', ()=> { if(confirm('Close dashboard?')) window.close(); });
+
+  // pick QR or code
+  btnQR.addEventListener('click', async ()=> {
+    pairingMode = 'qr';
+    await fetchQRCodeIfExists(true); // try server BAILEYS first
+  });
+  btnCode.addEventListener('click', async ()=> {
+    pairingMode = 'code';
+    await fetchCodeFromServer();
+  });
+
+  // when hit "Hubungkan" -- for demo we accept the generated token and set status connected
+  doPairBtn.addEventListener('click', async ()=>{
+    const number = senderInput.value.trim();
+    if (!number) return alert('Masukkan nomor sender dulu!');
+    if (!pairingMode) return alert('Pilih mode QR atau KODE dahulu');
+    // If BAILEYS is available and pairingMode='qr' we assume scanning must be done on device; here we just toggle connected after a short wait
+    // For real flow, frontend should display BAILEYS QR and user must scan on WA to create session. After server sees open connection, /api/status will be connected.
+    connectionResult.innerHTML = `<div style="padding:10px; color:#ddd">Mencoba menghubungkan... tunggu sebentar.</div>`;
+    // If server actually has BAILEYS connection and open: we emulate connect success by polling /api/status
+    // For UX here we set connected if server says connected OR we just demo connect.
+    // Poll status for short time:
+    let tries = 0;
+    const poll = setInterval(async ()=>{
+      tries++;
+      const st = await (await fetch('/api/status')).json().catch(()=>({connected:false}));
+      if (st && st.connected) {
+        setConnected(true);
+        clearInterval(poll);
+        connectionResult.innerHTML = `<div style="padding:8px; color:#bfffcf">Berhasil terhubung (server). JID: ${st.user || 'unknown'}</div>`;
+      } else if (tries > 3) {
+        // fallback demo: mark as connected (since we generated code/qr locally)
+        setConnected(true);
+        clearInterval(poll);
+        connectionResult.innerHTML = `<div style="padding:8px; color:#bfffcf">Terhubung (demo).</div>`;
+      } else {
+        connectionResult.innerHTML = `<div style="padding:8px; color:#ffd1d1">Menunggu server/auth... (try ${tries})</div>`;
+      }
+    }, 1200);
+    setTimeout(()=>{ clearInterval(poll); }, 10000);
+    // keep modal open so user can see result
+  });
+
+  // Execute button -> call /api/send
+  execBtn.addEventListener('click', async ()=>{
+    const target = targetInput.value.trim();
+    if (!target) return alert('Masukkan nomor target!');
+    const fn = funcSelect.value;
+    execBtn.disabled = true;
+    execBtn.innerText = 'Mengirim...';
+    try {
+      const res = await fetch('/api/send', {
+        method: 'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ target, functionName: fn })
+      });
+      const j = await res.json();
+      if (j.ok) {
+        alert('Pesan berhasil dikirim ke ' + target);
+      } else {
+        alert('Gagal kirim: ' + (j.msg || 'unknown'));
+      }
+    } catch (err) {
+      alert('Error saat kirim: ' + err);
+    } finally {
+      execBtn.disabled = false;
+      execBtn.innerText = '🚀 EXECUTE';
+    }
+  });
+
+  // fetch BAILEYS QR if exists
+  async function fetchQRCodeIfExists(showToast=false){
+    connectionResult.innerHTML = `<div style="padding:8px;">Memeriksa QR dari server...</div>`;
+    try {
+      const resp = await fetch('/api/qr');
+      const j = await resp.json();
+      if (j && j.ok && j.dataUrl) {
+        pairingMode = 'qr';
+        lastGenerated = { type:'qr', dataUrl: j.dataUrl, payload: 'baileys-qr' };
+        connectionResult.innerHTML = `<div class="qrBox"><img src="${j.dataUrl}" style="max-width:240px"/><div style="font-size:13px;margin-top:8px;color:#ccc">Scan QR pakai WhatsApp (device target)</div></div>`;
+      } else {
+        // no BAILEYS QR available -> show generated token
+        if (showToast) connectionResult.innerHTML = `<div style="padding:8px; color:#ffc">Tidak ada QR aktif dari server.</div>`; 
+        lastGenerated = null;
+      }
+    } catch (e) {
+      connectionResult.innerHTML = `<div style="padding:8px; color:#f88">Gagal ambil QR: ${e.toString()}</div>`;
+    }
+  }
+
+  // fetch code from server (dummy)
+  async function fetchCodeFromServer(){
+    connectionResult.innerHTML = `<div style="padding:8px">Meng-generate kode ...</div>`;
+    try {
+      const resp = await fetch('/api/generate/code');
+      const j = await resp.json();
+      lastGenerated = { type:'code', payload: j.both || (j.code + '-' + j.token) };
+      connectionResult.innerHTML = `<div class="codeBox">Kode: <strong style="font-size:16px">${j.code}</strong><div style="margin-top:6px;color:#bbb">Token: ${j.token}</div></div>`;
+    } catch (e){
+      connectionResult.innerHTML = `<div style="padding:8px; color:#f88">Gagal generate code</div>`;
+    }
+  }
+
+  function setConnected(flag){
+    if (flag) {
+      statusDot.classList.add('connected');
+      statusText.innerText = 'TERHUBUNG';
+    } else {
+      statusDot.classList.remove('connected');
+      statusText.innerText = 'BELUM TERHUBUNG';
+    }
+  }
+
+  // poll status every 5s
+  async function pollStatus(){
+    try {
+      const res = await fetch('/api/status');
+      const j = await res.json();
+      setConnected(!!j.connected);
+    } catch (e) {
+      setConnected(false);
+    } finally {
+      setTimeout(pollStatus, 5000);
+    }
+  }
+  pollStatus();
+
+</script>
+</body>
+</html>

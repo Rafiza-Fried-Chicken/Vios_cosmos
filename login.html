@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>COSMOS EXP - Login</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: black;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-container {
+      background: #0d0d0d;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      width: 320px;
+      box-shadow: 0 0 25px red;
+    }
+    .logo img {
+      width: 120px;
+      border-radius: 50%;
+      margin-bottom: 15px;
+      box-shadow: 0 0 20px red;
+    }
+    .title-small {
+      font-size: 20px;
+      letter-spacing: 2px;
+      color: #ff0000;
+      margin: 0;
+      text-shadow: 0 0 15px red;
+    }
+    .title-big {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 5px 0 15px 0;
+      color: #fff;
+      text-shadow: 0 0 20px red;
+    }
+    .form-input {
+      background: #1a1a1a;
+      border: 1px solid red;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 15px;
+      width: 100%;
+      color: white;
+      outline: none;
+    }
+    .login-btn {
+      background: red;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 10px;
+      cursor: pointer;
+      width: 100%;
+      text-shadow: 0 0 10px black;
+    }
+    .login-btn:hover {
+      background: darkred;
+    }
+    .buy-btn {
+      background: #b30000;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      padding: 10px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 15px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .buy-btn:hover {
+      background: #ff1a1a;
+    }
+    .by-text {
+      color: #ff3333;
+      margin-bottom: 20px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <!-- Gambar Logo -->
+    <div class="logo">
+      <img src="https://files.catbox.moe/7xdj1v.jpg" alt="COSMOS EXP Logo">
+    </div>
+    
+    <!-- Judul -->
+    <p class="title-small">EXP</p>
+    <h1 class="title-big">COSMOS</h1>
+    <p class="by-text">By ViosTzz</p>
+    
+    <!-- Form Login -->
+    <form id="loginForm">
+      <input type="text" class="form-input" placeholder="Username" name="username" required>
+      <input type="password" class="form-input" placeholder="Password" name="password" required>
+      <button type="submit" class="login-btn">LOGIN</button>
+    </form>
+
+    <!-- Tombol Buy Access -->
+    <a href="https://t.me/Alwaysprimeee" target="_blank" class="buy-btn">Buy Access</a>
+  </div>
+
+  <script>
+    async function handleLogin(event) {
+      event.preventDefault();
+
+      const username = document.querySelector('input[name="username"]').value;
+      const password = document.querySelector('input[name="password"]').value;
+
+      try {
+        // Ambil data user langsung dari server.js
+        const res = await fetch('/users'); // endpoint di server.js
+        if (!res.ok) throw new Error("Gagal mengambil data user dari server");
+        const users = await res.json();
+
+        const userFound = users.find(u => u.username === username && u.password === password);
+
+        if (userFound) {
+          localStorage.setItem("loggedInUser", username);
+          window.location.href = "dashboard.html";
+        } else {
+          alert("❌ Username atau Password salah!");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("❌ Terjadi kesalahan saat login!");
+      }
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", handleLogin);
+  </script>
+</body>
+</html>
